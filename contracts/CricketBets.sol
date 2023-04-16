@@ -49,4 +49,40 @@ contract CricketBets is Ownable {
     function testOracleConnection() public view returns (bool) {
         return CricketOracle.testConnection(); 
     }
+
+
+    // ==========================BET HELPERS==========================
+
+    /// @notice gets a list ids of all currently bettable matches
+    /// @return array of match ids 
+    function getBettableMatches() public view returns (bytes32[] memory) {
+        return CricketOracle.getPendingMatches(); 
+    }
+
+    /// @notice returns the full data of the specified match 
+    /// @param _matchId the id of the desired match
+    
+    function getMatch(bytes32 _matchId) public view returns (
+        bytes32 id,
+        string memory name, 
+        string memory participants,
+        uint8 participantCount,
+        uint date, 
+        OracleInterface.MatchOutcome outcome, 
+        int8 winner) { 
+
+        return CricketOracle.getMatch(_matchId); 
+    }
+
+    function getMostRecentMatch() public view returns (
+        bytes32 id,
+        string memory name, 
+        string memory participants,
+        uint participantCount, 
+        uint date, 
+        OracleInterface.MatchOutcome outcome, 
+        int8 winner) { 
+
+        return CricketOracle.getMostRecentMatch(true); 
+    }
 }
