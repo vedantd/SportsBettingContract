@@ -93,6 +93,25 @@ contract CricketBets is Ownable {
         return winner;
     }
 
+    // ==========================BETTING FUNCTION==========================
+
+    /// @notice places a non-rescindable bet on the given match 
+    /// @param _matchId the id of the match on which to bet 
+    /// @param _chosenWinner the index of the participant chosen as winner (0 or 1)
+    function placeBet(bytes32 _matchId, int8 _chosenWinner) external  payable {
+
+        require(CricketOracle.matchExists(_matchId), "Specified match not found"); 
+
+        Bet[] storage bets = matchToBets[_matchId]; 
+        bets = matchToBets[_matchId]; 
+        bets.push(Bet(msg.sender, _matchId, msg.value, _chosenWinner)); 
+
+        Bet[] storage userBets = userToBets[msg.sender];
+        userBets = userToBets[msg.sender]; 
+        userBets.push(Bet(msg.sender, _matchId, msg.value, _chosenWinner)); 
+        
+    }
+
     // ==========================WINNING SHARE HELPER FUNCTIONS==========================
     
     /// @notice returns the total amount in pot on the winning side of bet
@@ -123,23 +142,27 @@ contract CricketBets is Ownable {
         return sum;
     }
 
-    
-    // ==========================BETTING FUNCTION==========================
+    // ==========================WINNING SHARE FUNCTION==========================
 
-    /// @notice places a non-rescindable bet on the given match 
-    /// @param _matchId the id of the match on which to bet 
-    /// @param _chosenWinner the index of the participant chosen as winner (0 or 1)
-    function placeBet(bytes32 _matchId, int8 _chosenWinner) external  payable {
+        function getUserClaimableAmount(bytes32 _matchId) public view returns(uint256){
+        //if bet is on winning team then else calimabale is zero
+       uint256 Winnings=_getLosersPotAmount(_matchId);
+       uint256 winnersPoolAmount=_getWinnersPotAmount(_matchId);
+       uint256 userAmount =0 ;
+       
+       Bet[] storage userbets = userToBets[msg.sender];
+            for (uint i=0; i<userbets.length; i++) {
+            if(userbets[uint(i)].matchId==_matchId){
+                userAmount=userAmount+userbets[uint(i)].amount;
+            }   
+        }
+        // userWinnings is share of winners pool * total winnings
+        // userWinnings is (userAmountBet/totalBetAmountOfAllWinners) * TotalWinnings ;
+        uint256 temp=SafeMath.mul(Winnings,userAmount);
+        uint256 amountClaimable = SafeMath.div(temp,winnersPoolAmount);
 
-        require(CricketOracle.matchExists(_matchId), "Specified match not found"); 
-
-        Bet[] storage bets = matchToBets[_matchId]; 
-        bets = matchToBets[_matchId]; 
-        bets.push(Bet(msg.sender, _matchId, msg.value, _chosenWinner)); 
-
-        Bet[] storage userBets = userToBets[msg.sender];
-        userBets = userToBets[msg.sender]; 
-        userBets.push(Bet(msg.sender, _matchId, msg.value, _chosenWinner)); 
-        
+        return amountClaimable;
+   
     }
+    
 }
