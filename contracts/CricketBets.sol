@@ -93,6 +93,22 @@ contract CricketBets is Ownable {
         return winner;
     }
 
+    // ==========================BET HELPERS==============================
+
+    /// @notice determines whether or not the user has already bet on the given match
+    /// @return true if the given user has already placed a bet on the given match 
+    function _betIsValid() private pure  returns (bool) {
+
+        return true;
+    }
+
+    /// @notice determines whether or not bets may still be accepted for the given match
+    /// @return true if the match is bettable 
+    function _matchOpenForBetting() private pure returns (bool) {
+        
+        return true;
+    }
+
     // ==========================BETTING FUNCTION==========================
 
     /// @notice places a non-rescindable bet on the given match 
@@ -101,6 +117,12 @@ contract CricketBets is Ownable {
     function placeBet(bytes32 _matchId, int8 _chosenWinner) external  payable {
 
         require(CricketOracle.matchExists(_matchId), "Specified match not found"); 
+
+        //require that chosen winner falls within the defined number of participants for match
+        require(_betIsValid(), "Bet is not valid");
+
+        //match must still be open for betting
+        require(_matchOpenForBetting(), "Match not open for betting"); 
 
         Bet[] storage bets = matchToBets[_matchId]; 
         bets = matchToBets[_matchId]; 
