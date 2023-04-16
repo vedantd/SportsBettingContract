@@ -31,10 +31,18 @@ contract CricketBets is Ownable {
        
     }
 
+    // ==========================ORACLE FUNCTIONS==========================
+    /// @notice sets the address of the Cricket oracle being used 
+    /// @return bool of connection success
     function setOracleAddress(address _oracleAddress) external onlyOwner returns (bool) {
         CricketOracleAddr = _oracleAddress;
         CricketOracle = OracleInterface(CricketOracleAddr); 
         return CricketOracle.testConnection();
+    }
+    /// @notice gets the address of the Cricket oracle being used 
+    /// @return the address of the currently set oracle 
+    function getOracleAddress() external view returns (address) {
+        return CricketOracleAddr;
     }
     /// @notice for testing; tests that the Cricket oracle is callable 
     /// @return true if connection successful 
