@@ -85,4 +85,9 @@ contract CricketBets is Ownable {
 
         return CricketOracle.getMostRecentMatch(true); 
     }
+    
+    function _getWinningTeam(bytes32 _matchId) public view returns(int8 winner){
+        (,,,,,,winner)=CricketOracle.getMatch(_matchId);
+        return winner;
+    }
 }
