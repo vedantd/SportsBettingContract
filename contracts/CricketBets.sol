@@ -51,7 +51,7 @@ contract CricketBets is Ownable {
     }
 
 
-    // ==========================BET HELPERS==========================
+    // ==========================ORACLE BET HELPERS==========================
 
     /// @notice gets a list ids of all currently bettable matches
     /// @return array of match ids 
@@ -74,6 +74,7 @@ contract CricketBets is Ownable {
         return CricketOracle.getMatch(_matchId); 
     }
 
+    /// @notice returns the recented appended match to the oracle
     function getMostRecentMatch() public view returns (
         bytes32 id,
         string memory name, 
@@ -85,9 +86,60 @@ contract CricketBets is Ownable {
 
         return CricketOracle.getMostRecentMatch(true); 
     }
-    
+
+    /// @notice returns the winner of the specified match (0 or 1)
     function _getWinningTeam(bytes32 _matchId) public view returns(int8 winner){
         (,,,,,,winner)=CricketOracle.getMatch(_matchId);
         return winner;
+    }
+
+    // ==========================WINNING SHARE HELPER FUNCTIONS==========================
+    
+    /// @notice returns the total amount in pot on the winning side of bet
+    function _getWinnersPotAmount  (bytes32 _matchId) public view returns(uint256) {
+        Bet[] storage bets1 = matchToBets[_matchId];
+        int8 _winningTeam = _getWinningTeam(_matchId);
+        uint256 sum;
+        for (uint i=0; i<bets1.length; i++) {
+            if(bets1[uint(i)].chosenWinner==_winningTeam){
+                sum=sum+bets1[uint(i)].amount;
+            }
+        }
+        return sum;
+    }
+
+    // @notice returns the total amount in pot on the losing side of bet
+    function _getLosersPotAmount  (bytes32 _matchId) public view returns(uint256) {
+        // chcek if outcomne is specifically decided
+        Bet[] storage bets1 = matchToBets[_matchId];
+        int8 _winningTeam = _getWinningTeam(_matchId);
+        uint256 sum;
+        for (uint i=0; i<bets1.length; i++) {
+            if(bets1[uint(i)].chosenWinner!=_winningTeam){
+                sum=sum+bets1[uint(i)].amount;
+            }
+            
+        }
+        return sum;
+    }
+
+    
+    // ==========================BETTING FUNCTION==========================
+
+    /// @notice places a non-rescindable bet on the given match 
+    /// @param _matchId the id of the match on which to bet 
+    /// @param _chosenWinner the index of the participant chosen as winner (0 or 1)
+    function placeBet(bytes32 _matchId, int8 _chosenWinner) external  payable {
+
+        require(CricketOracle.matchExists(_matchId), "Specified match not found"); 
+
+        Bet[] storage bets = matchToBets[_matchId]; 
+        bets = matchToBets[_matchId]; 
+        bets.push(Bet(msg.sender, _matchId, msg.value, _chosenWinner)); 
+
+        Bet[] storage userBets = userToBets[msg.sender];
+        userBets = userToBets[msg.sender]; 
+        userBets.push(Bet(msg.sender, _matchId, msg.value, _chosenWinner)); 
+        
     }
 }
