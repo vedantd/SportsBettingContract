@@ -32,4 +32,9 @@ contract CricketBets is Ownable {
     }
 
 
+    /// @notice for testing; tests that the Cricket oracle is callable 
+    /// @return true if connection successful 
+    function testOracleConnection() public view returns (bool) {
+        return CricketOracle.testConnection(); 
+    }
 }
