@@ -166,7 +166,7 @@ contract CricketBets is Ownable {
 
     // ==========================WINNING SHARE FUNCTION==========================
 
-        function getUserClaimableAmount(bytes32 _matchId) public view returns(uint256){
+    function _getUserClaimableAmount(bytes32 _matchId) public view returns(uint256){
         //if bet is on winning team then else calimabale is zero
        uint256 Winnings=_getLosersPotAmount(_matchId);
        uint256 winnersPoolAmount=_getWinnersPotAmount(_matchId);
@@ -185,6 +185,15 @@ contract CricketBets is Ownable {
 
         return amountClaimable;
    
+    }
+
+    //=================================CLAIM WINNIING===============================
+    
+    function Claim (bytes32 _matchId) public payable {
+        uint amount=_getUserClaimableAmount(_matchId);
+        
+        (bool sent,) = (msg.sender).call{value: amount}("");
+        require(sent, "Failed to claim Ether");
     }
     
 }
