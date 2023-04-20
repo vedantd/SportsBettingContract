@@ -96,10 +96,16 @@ contract CricketBets is Ownable {
     // ==========================BET HELPERS==============================
 
     /// @notice determines whether or not the user has already bet on the given match
-    /// @return true if the given user has already placed a bet on the given match 
-    function _betIsValid() private pure  returns (bool) {
-
-        return true;
+    /// @return flag true if the given user has already placed a bet on the given match 
+    function _betIsValid(bytes32 _matchId) private view returns (bool flag) {
+        flag = false;
+        Bet[] storage userbets = userToBets[msg.sender];
+            for (uint i=0; i<userbets.length; i++) {
+            if(userbets[uint(i)].matchId==_matchId){
+                flag=true;
+            }        
+        } 
+        return flag;       
     }
 
     /// @notice determines whether or not bets may still be accepted for the given match
@@ -188,7 +194,7 @@ contract CricketBets is Ownable {
     }
 
     //=================================CLAIM WINNIING===============================
-    
+
     function Claim (bytes32 _matchId) public payable {
         uint amount=_getUserClaimableAmount(_matchId);
         
