@@ -98,11 +98,11 @@ contract CricketBets is Ownable {
     /// @notice determines whether or not the user has already bet on the given match
     /// @return flag true if the given user has already placed a bet on the given match 
     function _betIsValid(bytes32 _matchId) private view returns (bool flag) {
-        flag = false;
+        flag = true;
         Bet[] storage userbets = userToBets[msg.sender];
             for (uint i=0; i<userbets.length; i++) {
             if(userbets[uint(i)].matchId==_matchId){
-                flag=true;
+                flag=false;
             }        
         } 
         return flag;       
@@ -125,7 +125,7 @@ contract CricketBets is Ownable {
         require(CricketOracle.matchExists(_matchId), "Specified match not found"); 
 
         //require that chosen winner falls within the defined number of participants for match
-        require(_betIsValid(), "Bet is not valid");
+        require(_betIsValid(_matchId)==true, "Bet is not valid");
 
         //match must still be open for betting
         require(_matchOpenForBetting(), "Match not open for betting"); 
