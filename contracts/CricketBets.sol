@@ -27,11 +27,8 @@ contract CricketBets is Ownable {
         int8 chosenWinner; 
     }
 
-    constructor ()  { 
-       
-    }
-
     // ==========================ORACLE FUNCTIONS==========================
+
     /// @notice sets the address of the Cricket oracle being used 
     /// @return bool of connection success
     function setOracleAddress(address _oracleAddress) external onlyOwner returns (bool) {
@@ -110,9 +107,8 @@ contract CricketBets is Ownable {
 
     /// @notice determines whether or not bets may still be accepted for the given match
     /// @return true if the match is bettable 
-    function _matchOpenForBetting() private pure returns (bool) {
-        
-        return true;
+    function _matchOpenForBetting(bytes32 _matchId) private view returns (bool) {
+        return !CricketOracle.getMatchOutcome(_matchId);
     }
 
     // ==========================BETTING FUNCTION==========================
@@ -128,7 +124,7 @@ contract CricketBets is Ownable {
         require(_betIsValid(_matchId)==true, "Bet is not valid");
 
         //match must still be open for betting
-        require(_matchOpenForBetting(), "Match not open for betting"); 
+        require(_matchOpenForBetting(_matchId)==true, "Match not open for betting"); 
 
         Bet[] storage bets = matchToBets[_matchId]; 
         bets = matchToBets[_matchId]; 
